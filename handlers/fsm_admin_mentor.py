@@ -4,6 +4,7 @@ from aiogram.dispatcher.filters import Text
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from keyboards import client_kb
 from config import ADMINS
+from database.bot_db import sql_command_insert
 
 
 class FSMAdmin(StatesGroup):
@@ -18,7 +19,7 @@ class FSMAdmin(StatesGroup):
 
 
 async def fsm_start(message: types.Message):
-    if message.chat.type == "private" and message.chat.id in ADMINS:
+    if message.chat.type == "private":
         await FSMAdmin.name.set()
         await message.answer("Как Вас зовут?", reply_markup=client_kb.cancel_markup)
     else:
@@ -36,7 +37,7 @@ async def load_name(message: types.Message, state: FSMContext):
 async def load_age(message: types.Message, state: FSMContext):
     if not message.text.isdigit():
         await message.answer("Пишите числами!")
-    elif int(message.text) < 25 or int(message.text) > 50:
+    elif int(message.text) < 18 or int(message.text) > 50:
         await message.answer("Вы не прошли возрастное ограничение!")
     else:
         async with state.proxy() as data:
@@ -82,7 +83,7 @@ async def load_photo(message: types.Message, state: FSMContext):
 
 async def submit(message: types.Message, state: FSMContext):
     if message.text == "ДА":
-        # Подключение БД
+        await sql_command_insert(state)
         await state.finish()
         await message.answer("Вы зарегистрированы!")
     elif message.text == "НЕТ":
