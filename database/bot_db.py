@@ -45,6 +45,9 @@ async def sql_command_delete(id):
     db.commit()
 
 
+async def sql_command_all_id():
+    return cursor.execute('SELECT id FROM mentors').fetchall()
+
 
 
 
